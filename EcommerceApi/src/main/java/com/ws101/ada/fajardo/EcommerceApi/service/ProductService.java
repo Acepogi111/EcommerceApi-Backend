@@ -4,7 +4,7 @@ import com.ws101.ada.fajardo.EcommerceApi.model.Product;
 import com.ws101.ada.fajardo.EcommerceApi.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,19 +19,32 @@ public class ProductService {
     }
 
     public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id); // Eto yung nagre-return ng Optional
-    }
-
-    // ETO YUNG WALA KA KAYA NAG ERROR SA LINE 53
-    public List<Product> getProductsByPrice(double price) {
-        return productRepository.findByPrice(price);
+        return productRepository.findById(id);
     }
 
     public Product saveProduct(Product product) {
         return productRepository.save(product);
     }
 
-    public void deleteProduct(Product product) {
-        productRepository.delete(product);
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    public List<Product> searchProducts(String filterType, String filterValue) {
+        if (filterType == null || filterValue == null || filterValue.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        if ("name".equalsIgnoreCase(filterType)) {
+            return productRepository.findByNameContainingIgnoreCase(filterValue);
+        } else if ("price".equalsIgnoreCase(filterType)) {
+            try {
+                Double price = Double.parseDouble(filterValue);
+                return productRepository.findByPrice(price);
+            } catch (NumberFormatException e) {
+                return new ArrayList<>();
+            }
+        }
+        return new ArrayList<>();
     }
 }
