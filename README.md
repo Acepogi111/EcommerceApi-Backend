@@ -1,23 +1,33 @@
-# EcommerceApi - Product CRUD API
+# EcommerceApi-Backend
 
-## Project Overview
+REST API for E-commerce product management built with Spring Boot.
 
-A simple RESTful API for Product management built with Spring Boot. This project demonstrates CRUD operations using in-memory storage with HashMap. Created for WS101 - Task 6.
+## Features
 
-*Author:* Ace,reanne
-*Course:* WS101 - Web Systems and Technologies
+- CRUD operations for products
+- Search products by name and category
+- Full Javadoc documentation
+
+## Tech Stack
+
+- Java 17
+- Spring Boot 3.x
+- Spring Data JPA
+- MySQL / H2 Database
+- Gradle
 
 ## Setup Instructions
 
 ### Prerequisites
 
-- Java 17 or higher
-- Gradle
+- JDK 17 or higher
+- MySQL 8.0+ or use H2 in-memory DB
+- Gradle 8.x
 
-### How to Run
+### Run Locally
 
-1. Clone the repository:
+1. Clone the repository
 
    ```bash
    git clone https://github.com/Acepogi111/EcommerceApi-Backend.git
-   cd EcommerceApi
+
