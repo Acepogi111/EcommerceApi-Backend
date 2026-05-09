@@ -1,39 +1,45 @@
 package com.ws101.ada.fajardo.EcommerceApi.dto;
 
+import com.ws101.ada.fajardo.EcommerceApi.entity.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 public class ProductDTO {
-    
     private Long id;
     
     @NotBlank(message = "Product name is required")
     private String name;
     
-    private String description;
-    
     @NotNull(message = "Price is required")
-    @Positive(message = "Price must be greater than 0")
+    @Positive(message = "Price must be positive")
     private Double price;
+    
+    private String description;
     
     @NotNull(message = "Category ID is required")
     private Long categoryId;
     
     private String categoryName;
-    
-    public ProductDTO() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
-    public String getCategoryName() { return categoryName; }
-    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    // FIX: Handle null category
+    public ProductDTO(Product product) {
+        this.id = product.getId();
+        this.name = product.getName();
+        this.price = product.getPrice();
+        this.description = product.getDescription();
+        
+        // Check kung may category ba yung product
+        if (product.getCategory() != null) {
+            this.categoryId = product.getCategory().getId();
+            this.categoryName = product.getCategory().getName();
+        } else {
+            this.categoryId = null;
+            this.categoryName = "No Category";
+        }
+    }
 }

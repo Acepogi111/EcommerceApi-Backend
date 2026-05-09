@@ -27,67 +27,103 @@
             margin: 0 0 10px 0;
             color: #2196F3;
         }
+        .product p {
+            margin: 5px 0;
+            color: #555;
+        }
         .price {
             font-size: 20px;
             font-weight: bold;
-            color: #4CAF50;
+            color: #2e7d32;
+        }
+        .category {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
         }
         .empty {
+            background: #fff3e0;
+            color: #e65100;
+            padding: 20px;
+            border-radius: 8px;
             text-align: center;
-            color: #999;
+        }
+        .loading {
+            text-align: center;
             padding: 40px;
-        }
-        button {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            display: block;
-            margin: 20px auto;
-        }
-        button:hover {
-            background: #1976D2;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <h1>Product List</h1>
-    <button onclick="loadProducts()">Refresh Products</button>
-    <div id="productList"></div>
+    <h1>🛒 Product List</h1>
+    
+    <main id="productContainer">
+        <div class="loading">Loading products...</div>
+    </main>
 
     <script>
-        // Function para mag-fetch ng products galing sa API
-        async function loadProducts() {
-            const productList = document.getElementById('productList');
-            productList.innerHTML = '<p>Loading...</p>';
-            
+        async function fetchProducts() {
             try {
-                const response = await fetch('http://localhost:8080/api/products');
-                const products = await response.json();
+               const response = await fetch('/api/products');
                 
-                if (products.length === 0) {
-                    productList.innerHTML = '<div class="empty"><h2>No products yet</h2><p>Add ka muna gamit Postman or mag-insert sa DB</p></div>';
-                } else {
-                    productList.innerHTML = products.map(product => `
-                        <div class="product">
-                            <h3>${product.name}</h3>
-                            <p>${product.description || 'No description'}</p>
-                            <p class="price">₱${product.price}</p>
-                            <p><strong>Stock:</strong> ${product.quantity || product.stock || 0}</p>
-                        </div>
-                    `).join('');
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('404: Products not found');
+                    } else if (response.status === 500) {
+                        throw new Error('500: Server error');
+                    } else {
+                        throw new Error('HTTP Error: ' + response.status);
+                    }
                 }
+                
+                const products = await response.json();
+                return products;
+                
             } catch (error) {
-                productList.innerHTML = '<div class="empty"><h2>Error loading products</h2><p>Check mo kung running yung Spring Boot</p></div>';
-                console.error('Error:', error);
+                console.error('Fetch Error:', error.message);
+                throw error;
             }
         }
 
-        // Auto load pag open ng page
-        loadProducts();
+        async function renderProducts() {
+            const container = document.getElementById('productContainer');
+            
+            try {
+                const products = await fetchProducts();
+                
+                if (products.length === 0) {
+                    container.innerHTML = '<div class="empty"><h2>No products found</h2><p>Add some products to your database first.</p></div>';
+                    return;
+                }
+                
+                const productHTML = products.map(function(product) {
+                    return '<div class="product">' +
+                        '<div class="category">' + product.categoryName + '</div>' +
+                        '<h3>' + product.name + '</h3>' +
+                        '<p>' + (product.description || 'No description') + '</p>' +
+                        '<div class="price">₱' + product.price.toLocaleString() + '</div>' +
+                    '</div>';
+                }).join('');
+                
+                container.innerHTML = productHTML;
+                
+            } catch (error) {
+                container.innerHTML = '<div class="error"><h2>Failed to load products</h2><p>' + error.message + '</p></div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', renderProducts);
     </script>
 </body>
 </html>
