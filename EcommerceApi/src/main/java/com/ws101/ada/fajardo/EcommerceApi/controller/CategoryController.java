@@ -1,48 +1,63 @@
 package com.ws101.ada.fajardo.EcommerceApi.controller;
 
 import com.ws101.ada.fajardo.EcommerceApi.entity.Category;
-import com.ws101.ada.fajardo.EcommerceApi.service.CategoryService;
+import com.ws101.ada.fajardo.EcommerceApi.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
-/**
- * REST Controller for Category endpoints.
- * Controller → Service → Repository pattern
- */
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = "*")
 public class CategoryController {
 
     @Autowired
-    private CategoryService categoryService; // GAMITIN SI SERVICE, HINDI REPO
+    private CategoryRepository categoryRepository;
 
     // GET ALL - Kuha lahat ng categories
     @GetMapping
     public List<Category> getAllCategories() {
-        return categoryService.getAllCategories();
+        return categoryRepository.findAll();
     }
 
     // GET BY ID - Kuha isang category
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
-        return categoryService.getCategoryById(id)
+        return categoryRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST - Create new category - ITO YUNG WALA KA KANINA
+    // POST - Create new category
     @PostMapping
-    public Category createCategory(@RequestBody Category category) {
-        return categoryService.createCategory(category);
+    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
+        Category savedCategory = categoryRepository.save(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+    }
+
+    // PUT - Update category
+    @PutMapping("/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category categoryDetails) {
+        return categoryRepository.findById(id)
+                .map(category -> {
+                    category.setName(categoryDetails.getName());
+                    category.setDescription(categoryDetails.getDescription());
+                    Category updated = categoryRepository.save(category);
+                    return ResponseEntity.ok(updated);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // DELETE - Delete category
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return categoryRepository.findById(id)
+                .map(category -> {
+                    categoryRepository.delete(category);
+                    return ResponseEntity.noContent().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }

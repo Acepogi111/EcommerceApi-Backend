@@ -22,39 +22,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
-    }
-
-    @PostMapping
+    @PostMapping  // ← DAGDAG MO TO BRO
     public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
-        ProductDTO saved = productService.saveProduct(productDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> updateProduct(@PathVariable("id") Long id, @Valid @RequestBody ProductDTO productDTO) {
-        productDTO.setId(id);
-        ProductDTO updated = productService.saveProduct(productDTO);
-        return ResponseEntity.ok(updated);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/category/{name}")
-    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable("name") String name) {
-        return ResponseEntity.ok(productService.getProductsByCategoryName(name));
-    }
-
-    @GetMapping("/price-range")
-    public ResponseEntity<List<ProductDTO>> getProductsByPriceRange(
-            @RequestParam("min") Double min, 
-            @RequestParam("max") Double max) {
-        return ResponseEntity.ok(productService.getProductsByPriceRange(min, max));
+        ProductDTO createdProduct = productService.createProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 }
