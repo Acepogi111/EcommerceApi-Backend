@@ -1,6 +1,6 @@
 package com.ws101.ada.fajardo.EcommerceApi.service;
 
-import com.ws101.ada.fajardo.EcommerceApi.model.Product;
+import com.ws101.ada.fajardo.EcommerceApi.entity.Product;
 import com.ws101.ada.fajardo.EcommerceApi.repository.ProductRepository;
 import com.ws101.ada.fajardo.EcommerceApi.exception.ProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

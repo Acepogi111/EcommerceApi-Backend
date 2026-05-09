@@ -1,6 +1,6 @@
 package com.ws101.ada.fajardo.EcommerceApi.controller;
 
-import com.ws101.ada.fajardo.EcommerceApi.model.Product;
+import com.ws101.ada.fajardo.EcommerceApi.entity.Product;
 import com.ws101.ada.fajardo.EcommerceApi.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
