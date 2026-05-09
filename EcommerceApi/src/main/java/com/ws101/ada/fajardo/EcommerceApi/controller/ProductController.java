@@ -1,7 +1,8 @@
 package com.ws101.ada.fajardo.EcommerceApi.controller;
 
-import com.ws101.ada.fajardo.EcommerceApi.entity.Product;
+import com.ws101.ada.fajardo.EcommerceApi.dto.ProductDTO;
 import com.ws101.ada.fajardo.EcommerceApi.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,53 +17,43 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        return productService.getProductById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        Product savedProduct = productService.saveProduct(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
+        ProductDTO saved = productService.saveProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        return productService.getProductById(id)
-                .map(existingProduct -> {
-                    product.setId(id);
-                    Product updatedProduct = productService.saveProduct(product);
-                    return ResponseEntity.ok(updatedProduct);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable("id") Long id, @Valid @RequestBody ProductDTO productDTO) {
+        productDTO.setId(id);
+        ProductDTO updated = productService.saveProduct(productDTO);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-    // TASK 3 CUSTOM QUERIES - ITO YUNG BAGO
     @GetMapping("/category/{name}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String name) {
-        List<Product> products = productService.getProductsByCategoryName(name);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable("name") String name) {
+        return ResponseEntity.ok(productService.getProductsByCategoryName(name));
     }
 
     @GetMapping("/price-range")
-    public ResponseEntity<List<Product>> getProductsByPriceRange(
-            @RequestParam Double min, 
-            @RequestParam Double max) {
-        List<Product> products = productService.getProductsByPriceRange(min, max);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductDTO>> getProductsByPriceRange(
+            @RequestParam("min") Double min, 
+            @RequestParam("max") Double max) {
+        return ResponseEntity.ok(productService.getProductsByPriceRange(min, max));
     }
 }
