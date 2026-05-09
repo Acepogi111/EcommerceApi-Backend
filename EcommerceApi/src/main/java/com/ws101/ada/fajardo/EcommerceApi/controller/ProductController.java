@@ -1,91 +1,60 @@
 package com.ws101.ada.fajardo.EcommerceApi.controller;
 
-import com.ws101.ada.fajardo.EcommerceApi.exception.ProductNotFoundException;
-import com.ws101.ada.fajardo.EcommerceApi.model.Product;
+import com.ws101.ada.fajardo.EcommerceApi.dto.ProductDTO;
 import com.ws101.ada.fajardo.EcommerceApi.service.ProductService;
-
 import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/products")
+@CrossOrigin(origins = "*")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        Product product = productService.getProductById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-        return ResponseEntity.ok(product);
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PostMapping
-public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
-    Product savedProduct = productService.saveProduct(product);
-    return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
-}
-    
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
+        ProductDTO saved = productService.saveProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
 
     @PutMapping("/{id}")
-public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody Product productDetails) {
-    Product product = productService.getProductById(id)
-            .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-    
-    product.setName(productDetails.getName());
-    product.setPrice(productDetails.getPrice());
-    product.setDescription(productDetails.getDescription());
-    
-    Product updatedProduct = productService.saveProduct(product);
-    return ResponseEntity.ok(updatedProduct);
-}
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<Product> partialUpdateProduct(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        Product product = productService.getProductById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-        
-        if (updates.containsKey("name")) {
-            product.setName((String) updates.get("name"));
-        }
-        if (updates.containsKey("price")) {
-            product.setPrice(Double.parseDouble(updates.get("price").toString()));
-        }
-        if (updates.containsKey("description")) {
-            product.setDescription((String) updates.get("description"));
-        }
-        
-        Product updatedProduct = productService.saveProduct(product);
-        return ResponseEntity.ok(updatedProduct);
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable("id") Long id, @Valid @RequestBody ProductDTO productDTO) {
+        productDTO.setId(id);
+        ProductDTO updated = productService.saveProduct(productDTO);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.getProductById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
-        productService.deleteProduct(id); // ID yung pinapasa, hindi Product
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(
-            @RequestParam String filterType,
-            @RequestParam String filterValue) {
-        List<Product> products = productService.searchProducts(filterType, filterValue);
-        return ResponseEntity.ok(products);
+    @GetMapping("/category/{name}")
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable("name") String name) {
+        return ResponseEntity.ok(productService.getProductsByCategoryName(name));
+    }
+
+    @GetMapping("/price-range")
+    public ResponseEntity<List<ProductDTO>> getProductsByPriceRange(
+            @RequestParam("min") Double min, 
+            @RequestParam("max") Double max) {
+        return ResponseEntity.ok(productService.getProductsByPriceRange(min, max));
     }
 }
